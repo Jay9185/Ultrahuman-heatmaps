@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Interactive biometric charts from the IMSAFE + Ultrahuman Ring Air study. 47 flights, 168 days of HRV and sleep data from KDVT flight training. TurbulenceGains.com">
+  <meta name="robots" content="noindex, follow">
+  <title>IMSAFE Biometric Charts — TurbulenceGains.com</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0D1117;
+      --surface:   #161B22;
+      --border:    #21262D;
+      --text:      #E6EDF3;
+      --muted:     #8B949E;
+      --accent:    #58A6FF;
+      --danger:    #F85149;
+      --ok:        #3FB950;
+      --amber:     #D29922;
+      --mono:      'IBM Plex Mono', monospace;
+      --sans:      'IBM Plex Sans', sans-serif;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Header ─────────────────────────────── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 28px 32px 24px;
+    }
+
+    .header-eyebrow {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    header h1 {
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.3;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 13px;
+      max-width: 620px;
+    }
+
+    .header-meta {
+      display: flex;
+      gap: 24px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .meta-pill {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 3px 10px;
+    }
+
+    .meta-pill span {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* ── Main grid ───────────────────────────── */
+    main {
+      padding: 32px;
+      display: grid;
+      gap: 24px;
+    }
+
+    /* ── Chart card ──────────────────────────── */
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .card-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .card-title {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .card-desc {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+      max-width: 560px;
+      line-height: 1.5;
+    }
+
+    .open-btn {
+      flex-shrink: 0;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 3px;
+      padding: 5px 12px;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .open-btn:hover {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    /* ── iframe ──────────────────────────────── */
+    .chart-frame {
+      width: 100%;
+      border: none;
+      display: block;
+      background: var(--bg);
+    }
+
+    /* ── Finding strip ───────────────────────── */
+    .finding-strip {
+      display: flex;
+      gap: 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .finding {
+      flex: 1;
+      padding: 12px 16px;
+      border-right: 1px solid var(--border);
+    }
+
+    .finding:last-child { border-right: none; }
+
+    .finding-value {
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 500;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .finding-label {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .red   { color: var(--danger); }
+    .green { color: var(--ok); }
+    .amber { color: var(--amber); }
+    .blue  { color: var(--accent); }
+
+    /* ── Footer ──────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 20px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    footer p {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+    .disclaimer {
+      font-size: 10px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      padding: 12px 32px 20px;
+      font-family: var(--mono);
+      line-height: 1.6;
+      opacity: 0.7;
+    }
+
+    /* ── Responsive ──────────────────────────── */
+    @media (max-width: 600px) {
+      header, main, footer { padding: 20px 16px; }
+      .header-meta { gap: 10px; }
+      .finding-strip { flex-wrap: wrap; }
+      .finding { min-width: 50%; border-right: none; border-bottom: 1px solid var(--border); }
+      .finding:last-child { border-bottom: none; }
+      .card-header { flex-direction: column; }
+      .open-btn { align-self: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Header ─────────────────────────────── -->
+  <header>
+    <div class="header-eyebrow">TurbulenceGains.com — Data Supplement</div>
+    <h1>IMSAFE + Ultrahuman Ring Air:<br>Biometric Charts from 47 Flight Training Days</h1>
+    <p>
+      Interactive charts supporting the article
+      <em>"IMSAFE Checklist Stress &amp; Fatigue: Ultrahuman Ring Air HRV Data for Pilots (2026)"</em>.
+      All data is sourced from a continuous Ultrahuman Ring Air export and the KDVT flight logbook,
+      cross-referenced by date. N=1 self-experiment.
+    </p>
+    <div class="header-meta">
+      <div class="meta-pill">Flights logged: <span>47</span></div>
+      <div class="meta-pill">Days tracked: <span>168</span></div>
+      <div class="meta-pill">Period: <span>Feb – Jun 2026</span></div>
+      <div class="meta-pill">Airport: <span>KDVT Phoenix Deer Valley</span></div>
+      <div class="meta-pill">Aircraft: <span>PA-28-181 Archer</span></div>
+    </div>
+  </header>
+
+  <!-- ── Charts ─────────────────────────────── -->
+  <main>
+
+    <!-- Fig 1 -->
+    <div class="chart-card">
+      <div class="card-header">
+        <div>
+          <div class="card-label">Figure 1</div>
+          <div class="card-title">Workload Intensity vs Next-Day Recovery</div>
+          <div class="card-desc">
+            Blue bars = landings per flight day. Red bars = high-workload days (≥5 landings).
+            Green line = next-day recovery score. Red dots = days where recovery fell below the
+            elevated-risk threshold of 50.
+          </div>
+        </div>
+        <a class="open-btn" href="fig1_workload_recovery.html" target="_blank" rel="noopener">
+          Open full ↗
+        </a>
+      </div>
+      <iframe
+        class="chart-frame"
+        src="fig1_workload_recovery.html"
+        height="440"
+        title="Workload Intensity vs Next-Day Recovery"
+        loading="lazy">
+      </iframe>
+      <div class="finding-strip">
+        <div class="finding">
+          <div class="finding-value red">61.8</div>
+          <div class="finding-label">Avg next-day recovery<br>after high-workload days (≥5 landings)</div>
+        </div>
+        <div class="finding">
+          <div class="finding-value green">70.2</div>
+          <div class="finding-label">Avg next-day recovery<br>after low-workload days (&lt;5 landings)</div>
+        </div>
+        <div class="finding">
+          <div class="finding-value amber">13.3%</div>
+          <div class="finding-label">Flights conducted in<br>elevated risk band (recovery &lt;50)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fig 2 -->
+    <div class="chart-card">
+      <div class="card-header">
+        <div>
+          <div class="card-label">Figure 2</div>
+          <div class="card-title">The 44-Minute REM Deficit: Flight Days vs Rest Days</div>
+          <div class="card-desc">
+            Faded bars = rest day averages. Solid bars = flight day averages.
+            Red annotations show the deficit per sleep stage. All three differences
+            are statistically significant (p&lt;0.05).
+          </div>
+        </div>
+        <a class="open-btn" href="fig2_sleep_architecture.html" target="_blank" rel="noopener">
+          Open full ↗
+        </a>
+      </div>
+      <iframe
+        class="chart-frame"
+        src="fig2_sleep_architecture.html"
+        height="400"
+        title="The 44-Minute REM Deficit"
+        loading="lazy">
+      </iframe>
+      <div class="finding-strip">
+        <div class="finding">
+          <div class="finding-value red">−44 min</div>
+          <div class="finding-label">REM sleep deficit<br>on flight days (p&lt;0.0001)</div>
+        </div>
+        <div class="finding">
+          <div class="finding-value red">−8 min</div>
+          <div class="finding-label">Deep sleep deficit<br>on flight days (p=0.023)</div>
+        </div>
+        <div class="finding">
+          <div class="finding-value red">−130 min</div>
+          <div class="finding-label">Total sleep deficit<br>on flight days (p&lt;0.0001)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fig 3 -->
+    <div class="chart-card">
+      <div class="card-header">
+        <div>
+          <div class="card-label">Figure 3</div>
+          <div class="card-title">Recovery Calendar: Fatigue Accumulation by Week</div>
+          <div class="card-desc">
+            Each cell = average recovery score for that day of week in that calendar week.
+            Red = elevated risk (&lt;50), amber = caution (50–65), green = clean (&gt;80).
+            Hover for exact values.
+          </div>
+        </div>
+        <a class="open-btn" href="fig3_recovery_heatmap.html" target="_blank" rel="noopener">
+          Open full ↗
+        </a>
+      </div>
+      <iframe
+        class="chart-frame"
+        src="fig3_recovery_heatmap.html"
+        height="360"
+        title="Recovery Calendar Heatmap"
+        loading="lazy">
+      </iframe>
+      <div class="finding-strip">
+        <div class="finding">
+          <div class="finding-value green">92</div>
+          <div class="finding-label">Highest recovery score<br>recorded in dataset</div>
+        </div>
+        <div class="finding">
+          <div class="finding-value red">25</div>
+          <div class="finding-label">Lowest recovery score<br>recorded in dataset</div>
+        </div>
+        <div class="finding">
+          <div class="finding-value blue">66.4</div>
+          <div class="finding-label">Mean recovery score<br>across all 168 days</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fig 4 -->
+    <div class="chart-card">
+      <div class="card-header">
+        <div>
+          <div class="card-label">Figure 4</div>
+          <div class="card-title">Landing Count vs Next-Day Recovery — OLS Trendline</div>
+          <div class="card-desc">
+            Each point = one flight day. Colour = next-day recovery (red &lt;50, amber 50–65, green &gt;65).
+            Dashed red line = OLS trendline. Hover any point for date and same-day recovery.
+            Note: result does not reach conventional significance (p=0.084, r²=0.068).
+          </div>
+        </div>
+        <a class="open-btn" href="fig4_landings_recovery.html" target="_blank" rel="noopener">
+          Open full ↗
+        </a>
+      </div>
+      <iframe
+        class="chart-frame"
+        src="fig4_landings_recovery.html"
+        height="440"
+        title="Landing Count vs Next-Day Recovery"
+        loading="lazy">
+      </iframe>
+      <div class="finding-strip">
+        <div class="finding">
+          <div class="finding-value red">r²=0.068</div>
+          <div class="finding-label">Variance in next-day recovery<br>explained by landing count</div>
+        </div>
+        <div class="finding">
+          <div class="finding-value amber">p=0.084</div>
+          <div class="finding-label">Statistical significance<br>(below conventional 0.05 threshold)</div>
+        </div>
+        <div class="finding">
+          <div class="finding-value red">−1.03 pts</div>
+          <div class="finding-label">Recovery drop per<br>additional landing (OLS slope)</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── Footer ─────────────────────────────── -->
+  <footer>
+    <p>
+      Data: Ultrahuman Ring Air API export + KDVT flight logbook —
+      <a href="https://turbulencegains.com/imsafe-ultrahuman-ring-pilot/" target="_blank" rel="noopener">
+        Read the full article
+      </a>
+    </p>
+    <p>
+      <a href="https://turbulencegains.com" target="_blank" rel="noopener">turbulencegains.com</a>
+      &nbsp;·&nbsp;
+      <a href="https://github.com/Jay9185" target="_blank" rel="noopener">github.com/Jay9185</a>
+      &nbsp;·&nbsp;
+      <a href="https://turbulencegains.com/partnerships/" target="_blank" rel="noopener">Partnerships</a>
+    </p>
+  </footer>
+
+  <div class="disclaimer">
+    N=1 self-experiment. Not an FAA-approved fitness-for-duty assessment.
+    The Ultrahuman Recovery Score is a proprietary metric not validated for aviation decision-making.
+    The IMSAFE checklist remains the legal standard. Use this data for personal situational awareness only.
+  </div>
+
+</body>
+</html>
